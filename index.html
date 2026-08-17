@@ -1,0 +1,1045 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🍸 Cocktail Pairing Bar</title>
+<style>
+:root{
+  --bg:#120f13; --panel:#1d1820; --panel2:#261f29; --text:#f6efe8;
+  --muted:#a99ca8; --accent:#e8b36b; --accent2:#b989c9; --line:#3b303d;
+  --good:#9fd4ad; --shadow:0 20px 60px #0008;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; min-height:100vh; color:var(--text);
+  font-family:Georgia,"Times New Roman",serif;
+  background:
+    radial-gradient(circle at 15% 5%,#4b2d3c55,transparent 30%),
+    radial-gradient(circle at 85% 15%,#8b5a3b33,transparent 28%),
+    linear-gradient(145deg,#100d11,#19131a 50%,#0e0b0f);
+}
+button,input{font:inherit}
+.wrap{max-width:1220px;margin:auto;padding:34px 20px 80px}
+.hero{text-align:center;margin-bottom:28px}
+.kicker{letter-spacing:.28em;text-transform:uppercase;color:var(--accent);font:700 12px/1.4 Arial,sans-serif}
+h1{font-size:clamp(38px,6vw,72px);margin:10px 0 6px;font-weight:400}
+.subtitle{color:var(--muted);font-style:italic;font-size:17px}
+.section{
+  background:linear-gradient(145deg,#211b23ee,#171319ee);
+  border:1px solid var(--line); border-radius:24px; padding:24px;
+  box-shadow:var(--shadow); margin:18px 0;
+}
+.section h2{font-size:25px;margin:0 0 5px;font-weight:400}
+.section-note{color:var(--muted);font-size:14px;margin-bottom:20px}
+.characters{display:grid;grid-template-columns:1fr 80px 1fr;gap:18px;align-items:stretch}
+.character-card{
+  min-height:310px;border:1px solid var(--line);border-radius:20px;
+  background:#120f14;overflow:hidden;position:relative;
+}
+.char-photo{height:205px;background:#211b22;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.char-photo img{width:100%;height:100%;object-fit:cover;display:none}
+.upload-label{cursor:pointer;color:var(--muted);text-align:center;padding:20px}
+.upload-label strong{display:block;color:var(--text);margin-bottom:7px}
+.file-input{display:none}
+.char-info{padding:16px 18px}
+.char-name-input{
+  width:100%;background:transparent;border:0;border-bottom:1px solid var(--line);
+  color:var(--text);font-size:21px;padding:5px 0;outline:none
+}
+.selected-drink{margin-top:13px;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.selected-drink .label{font:700 10px Arial,sans-serif;letter-spacing:.15em;color:var(--muted);text-transform:uppercase}
+.drink-name{font-size:19px;color:var(--accent)}
+.x{display:flex;align-items:center;justify-content:center;font-size:40px;color:var(--accent);font-style:italic}
+.active-player{
+  margin:0 auto 15px; width:max-content;max-width:100%; padding:9px 15px;border-radius:99px;
+  background:#302633;color:#f7e4c6;font:700 12px Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase
+}
+.tabs{display:flex;gap:7px;overflow:auto;padding-bottom:7px;margin-bottom:13px;scrollbar-width:thin}
+.tab,.nav-btn{
+  flex:0 0 auto;border:1px solid var(--line);background:#171319;color:var(--muted);
+  padding:9px 13px;border-radius:99px;cursor:pointer
+}
+.tab.active{background:var(--accent);border-color:var(--accent);color:#21170f}
+.drink-viewport{position:relative}
+.drink-row{
+  display:flex;gap:11px;overflow-x:auto;padding:4px 3px 16px;
+  scroll-behavior:smooth;scrollbar-color:#73536f #171319;scrollbar-width:auto
+}
+.drink-row::-webkit-scrollbar{height:12px}.drink-row::-webkit-scrollbar-track{background:#171319;border-radius:20px}
+.drink-row::-webkit-scrollbar-thumb{background:#73536f;border-radius:20px}
+.drink{
+  flex:0 0 130px;height:112px;border:1px solid var(--line);border-radius:17px;
+  background:#201a22;color:var(--text);cursor:pointer;padding:13px 10px;text-align:center;
+  transition:.18s transform,.18s border-color,.18s background
+}
+.drink:hover{transform:translateY(-3px);border-color:#8d6b8e}
+.drink.selected{border-color:var(--accent);background:#30261f;box-shadow:inset 0 0 0 1px var(--accent)}
+.drink .emoji{font-size:30px;display:block;margin-bottom:6px}
+.drink .dn{font-size:14px;line-height:1.15}
+.drink .dt{font:10px Arial,sans-serif;color:var(--muted);margin-top:5px;text-transform:uppercase}
+.mix{
+  display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;text-align:center;
+  background:#100d12;border:1px solid var(--line);border-radius:20px;padding:24px
+}
+.mix-drink{font-size:27px}.mix-drink small{display:block;color:var(--muted);font:11px Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;margin-bottom:8px}
+.plus{font-size:38px;color:var(--accent)}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:15px}
+.pill{border:1px solid var(--line);border-radius:99px;padding:7px 11px;color:#d8ccd5;font:11px Arial,sans-serif}
+.choice-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.choice{
+  border:1px solid var(--line);background:#181319;color:var(--text);border-radius:15px;padding:15px 10px;
+  cursor:pointer;min-height:76px
+}
+.choice:hover,.choice.active{border-color:var(--accent);background:#2b231d}
+.choice span{display:block;font-size:25px;margin-bottom:7px}.choice b{font-size:14px;font-weight:400}
+.four{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.visual{
+  min-height:175px;border:1px solid var(--line);border-radius:18px;padding:16px;background:#151116;
+}
+.visual .icon{font-size:35px}.visual h3{font-size:18px;font-weight:400;margin:9px 0 5px}.visual p{color:var(--muted);font-size:13px;margin:0}
+.review{
+  text-align:center;padding:30px;border-radius:22px;
+  background:radial-gradient(circle at 50% 0,#4c344a55,transparent 55%),#110e12;
+  border:1px solid #4b3949
+}
+.stars{font-size:25px;letter-spacing:4px;color:var(--accent);margin:8px}
+.review blockquote{font-size:clamp(21px,3vw,30px);line-height:1.35;margin:18px auto;max-width:820px}
+.review .small{color:var(--muted);font:12px Arial,sans-serif;text-transform:uppercase;letter-spacing:.12em}
+.reset{margin-top:18px;border:1px solid var(--line);background:transparent;color:var(--muted);padding:10px 16px;border-radius:99px;cursor:pointer}
+@media(max-width:800px){
+ .characters{grid-template-columns:1fr}.x{height:25px}.choice-grid{grid-template-columns:repeat(2,1fr)}.four{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:520px){.four{grid-template-columns:1fr}.section{padding:17px}.wrap{padding:22px 12px 50px}}
+
+.url-upload{width:100%;padding:20px;text-align:center;color:var(--muted)}
+.url-upload strong{display:block;color:var(--text);margin-bottom:10px}
+.url-upload input,.image-url{width:100%;background:#100d12;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:9px 10px;outline:none;font-size:12px}
+.url-upload button,.image-add{margin-top:8px;border:1px solid var(--line);background:#2b222c;color:var(--text);border-radius:99px;padding:8px 13px;cursor:pointer;font-size:12px}
+.scroll-choice{display:flex;gap:11px;overflow-x:auto;padding:5px 2px 15px;scroll-behavior:smooth;scrollbar-color:#73536f #171319;scrollbar-width:auto}
+.scroll-choice::-webkit-scrollbar{height:12px}.scroll-choice::-webkit-scrollbar-track{background:#171319;border-radius:20px}.scroll-choice::-webkit-scrollbar-thumb{background:#73536f;border-radius:20px}
+.scroll-choice .choice{flex:0 0 180px}
+.visual-img{height:105px;border-radius:12px;background:#201a22;border:1px dashed #4a3949;margin:8px 0;overflow:hidden;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px}
+.visual-img img{width:100%;height:100%;object-fit:cover}
+.image-add{margin-top:7px}
+
+.drink-photo-url{margin-top:12px}
+.drink-photo-url .label{display:block;font:700 10px Arial,sans-serif;letter-spacing:.15em;color:var(--muted);text-transform:uppercase;margin-bottom:7px}
+.drink-photo-url input{width:calc(100% - 82px);background:#100d12;border:1px solid var(--line);border-radius:9px;color:var(--text);padding:8px 9px;outline:none;font-size:11px}
+.drink-photo-url button{width:72px;margin-left:5px;border:1px solid var(--line);background:#2b222c;color:var(--text);border-radius:9px;padding:8px 5px;cursor:pointer;font-size:10px}
+.char-photo{height:250px}
+.char-photo img{width:100%;height:100%;object-fit:cover;display:none}
+.drink-badge{position:absolute;right:12px;bottom:12px;width:82px;height:82px;border-radius:12px;overflow:hidden;border:2px solid #f4e7df;box-shadow:0 7px 20px #000b;background:#171319;display:none;z-index:3}
+.drink-badge img{width:100%;height:100%;object-fit:cover;display:block}
+.drink-badge::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 0 1px #0005;border-radius:10px;pointer-events:none}
+.drink-card-stage{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
+.pair-stage-card{position:relative;height:310px;border:1px solid var(--line);border-radius:20px;overflow:hidden;background:#120f14}
+.pair-stage-card .portrait{width:100%;height:100%;object-fit:cover;display:none}
+.pair-stage-card .drink-overlay{position:absolute;right:14px;bottom:14px;width:92px;height:92px;border-radius:12px;overflow:hidden;border:2px solid #f4e7df;box-shadow:0 10px 24px #000b;background:#171319;display:none}
+.pair-stage-card .drink-overlay img{width:100%;height:100%;object-fit:cover}
+.pair-stage-card .stage-placeholder{height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted);text-align:center;padding:25px}
+.pair-stage-card .stage-name{position:absolute;left:14px;bottom:14px;padding:7px 10px;border-radius:9px;background:#120f14cc;border:1px solid #ffffff18;font-size:15px;z-index:4}
+.drink{display:flex;flex-direction:column;justify-content:space-between}
+.drink .emoji{order:2;margin:0;line-height:1;font-size:31px}
+.drink .dt{order:1;display:block;font:700 9px Arial,sans-serif;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin:0 0 3px}
+.drink .dn{order:3;display:block;font-size:14px;line-height:1.15;white-space:normal}
+.drink .drink-selected-mark{order:4}
+.scroll-choice .choice{min-height:88px}
+@media(max-width:800px){.drink-card-stage{grid-template-columns:1fr}.pair-stage-card{height:270px}}
+.picker-switch{display:flex;gap:10px;margin:0 auto 12px;max-width:760px}.picker-person{flex:1;border:1px solid var(--line);background:#171319;color:var(--muted);padding:12px 15px;border-radius:14px;cursor:pointer;text-align:left}.picker-person.active{border-color:var(--accent);background:#2b231d;color:var(--text)}.picker-person span{float:right;color:var(--accent)}.generate-wrap{text-align:center;padding:10px}.generate-aesthetic{border:1px solid var(--accent);background:#382831;color:#fff5e9;border-radius:999px;padding:14px 28px;cursor:pointer;font-weight:700}.aesthetic-preview{display:none}.aesthetic-sheet{border:1px solid #5a4655;border-radius:26px;padding:20px;background:#151116}.aesthetic-head{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  align-items:start
+}
+.aesthetic-characters{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  align-items:start
+}
+.aesthetic-character{
+  position:relative;
+  aspect-ratio:1/1;
+  border:1px solid var(--line);
+  border-radius:16px;
+  overflow:hidden;
+  background:#201a22
+}
+.aesthetic-character .character-photo{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+  display:block
+}
+.aesthetic-character .character-fallback{
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--muted);
+  text-align:center;
+  padding:18px;
+  font-size:12px
+}
+.aesthetic-character .character-label{
+  position:absolute;
+  left:8px;
+  top:8px;
+  max-width:calc(100% - 16px);
+  padding:5px 8px;
+  border-radius:8px;
+  background:#120f14dd;
+  border:1px solid #ffffff18;
+  color:#f4ebe4;
+  font-size:11px;
+  z-index:3;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis
+}
+.aesthetic-character .drink-mini{
+  position:absolute;
+  right:8px;
+  bottom:8px;
+  width:52px;
+  height:52px;
+  border-radius:9px;
+  overflow:hidden;
+  border:2px solid #f4e7df;
+  background:#171319;
+  box-shadow:0 7px 18px #000b;
+  z-index:4
+}
+.aesthetic-character .drink-mini img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block
+}
+.aesthetic-info{
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:20px;
+  background:#100d12;
+  min-height:100%
+}
+.aesthetic-info h3{
+  font-size:30px;
+  font-weight:400;
+  line-height:1.08;
+  margin:4px 0 8px
+}
+.aesthetic-info .names{
+  color:var(--accent);
+  font-size:15px;
+  line-height:1.35;
+  margin-bottom:16px
+}
+.aesthetic-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px
+}
+.aesthetic-tag{
+  padding:7px 9px;
+  border-radius:99px;
+  border:1px solid var(--line);
+  font:11px Arial,sans-serif;
+  color:#ddd0d9
+}
+.aesthetic-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  margin-top:14px
+}
+.aesthetic-card{
+  border:1px solid var(--line);
+  border-radius:14px;
+  overflow:hidden;
+  background:#100d12
+}
+.aesthetic-card img{
+  width:100%;
+  aspect-ratio:180/260;
+  height:auto;
+  object-fit:cover;
+  object-position:center;
+  display:block
+}
+.aesthetic-card .empty{
+  aspect-ratio:180/260;
+  height:auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--muted);
+  font-size:12px;
+  padding:15px;
+  text-align:center
+}
+.aesthetic-card p{
+  font:700 13px/1.15 Arial,sans-serif;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  text-align:center;
+  margin:12px 7px 16px;
+  color:#f0e5e8;
+  white-space:nowrap
+}
+.aesthetic-bottom{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(280px,.85fr);
+  gap:12px;
+  margin-top:14px;
+  padding-bottom:10px;
+  align-items:stretch
+}
+.aesthetic-review{
+  margin:0;
+  min-height:100%;
+  padding:22px;
+  border-radius:16px;
+  background:#201923;
+  border:1px solid #493849;
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  justify-content:center
+}
+.aesthetic-review blockquote{
+  font-size:17px;
+  line-height:1.35;
+  margin:10px auto;
+  max-width:780px
+}
+.aesthetic-drinks{display:none}
+@media(max-width:800px){
+  .aesthetic-head{grid-template-columns:1fr}
+  .aesthetic-bottom{grid-template-columns:1fr}
+}
+@media(max-width:520px){
+  .aesthetic-characters{grid-template-columns:1fr 1fr}
+  .aesthetic-grid{grid-template-columns:repeat(2,1fr)}
+  .aesthetic-info h3{font-size:25px}
+  .aesthetic-bottom{grid-template-columns:1fr}
+}}
+
+.aesthetic-people{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.aesthetic-person{position:relative;min-height:390px;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#100d12}
+.aesthetic-person-photo{position:absolute;inset:0}
+.aesthetic-person-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.aesthetic-person-photo .empty{height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted);padding:25px;text-align:center}
+.aesthetic-person-drink{position:absolute;right:14px;bottom:14px;width:100px;height:100px;border-radius:13px;overflow:hidden;border:2px solid #f4e7df;background:#171319;box-shadow:0 10px 24px #000b}
+.aesthetic-person-drink img{width:100%;height:100%;object-fit:cover;display:block}
+.aesthetic-person-drink .empty{height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:11px;text-align:center;padding:8px}
+.aesthetic-person-name,.aesthetic-person-drink-name{position:absolute;left:14px;padding:7px 10px;border-radius:9px;background:#120f14dd;border:1px solid #ffffff18;z-index:3}
+.aesthetic-person-name{bottom:14px;font-size:17px;padding-right:125px}
+.aesthetic-person-drink-name{bottom:119px;font:10px Arial,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);}
+@media(max-width:700px){.aesthetic-people{grid-template-columns:1fr}.aesthetic-person{min-height:330px}}
+
+.export-wrap{margin-top:14px;padding-top:16px;border-top:1px solid var(--line);text-align:center}.export-button{border:1px solid var(--accent);background:#171319;color:#f2e7df;border-radius:999px;padding:11px 22px;cursor:pointer;font:700 12px Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase}.export-output{display:none;margin-top:12px;width:100%;min-height:220px;box-sizing:border-box;resize:vertical;border:1px solid var(--line);border-radius:12px;background:#0d0b0f;color:#ded3dc;padding:13px;font:11px/1.45 Consolas,Monaco,monospace}.export-copy{display:none;margin:8px 5px 0;border:1px solid var(--line);background:#2b2228;color:#f2e7df;border-radius:9px;padding:8px 14px;cursor:pointer;font-size:11px}.export-status{display:none;color:var(--accent);font-size:11px;margin-top:7px}
+
+/* FINAL AESTHETIC: fixed composition that scales as one piece */
+.aesthetic-scale-frame{
+  width:100%;
+  height:auto;
+  overflow:hidden;
+  position:relative;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+}
+.aesthetic-scale-frame .aesthetic-sheet{
+  width:1000px;
+  max-width:none;
+  margin:0;
+  box-sizing:border-box;
+  transform-origin:top center;
+  flex:none;
+}
+.aesthetic-scale-frame .aesthetic-head{
+  grid-template-columns:1fr 1fr !important;
+}
+.aesthetic-scale-frame .aesthetic-characters{
+  grid-template-columns:1fr 1fr !important;
+}
+.aesthetic-scale-frame .aesthetic-grid{
+  grid-template-columns:repeat(4,1fr) !important;
+}
+.aesthetic-scale-frame .aesthetic-bottom{
+  grid-template-columns:minmax(0,1fr) minmax(280px,.85fr) !important;
+}
+
+/* Keep final aesthetic composition fixed: only the canvas scales, never reflows. */
+.aesthetic-scale-frame{width:100%;overflow:hidden;position:relative;display:flex;justify-content:center;align-items:flex-start;}
+.aesthetic-scale-frame .aesthetic-sheet{width:1000px;max-width:none;margin:0;box-sizing:border-box;transform-origin:top center;flex:none;}
+.aesthetic-scale-frame .aesthetic-head{grid-template-columns:1fr 1fr !important;}
+.aesthetic-scale-frame .aesthetic-characters{grid-template-columns:1fr 1fr !important;}
+.aesthetic-scale-frame .aesthetic-grid{grid-template-columns:repeat(4,1fr) !important;}
+.aesthetic-scale-frame .aesthetic-bottom{grid-template-columns:repeat(4,minmax(0,1fr)) minmax(280px,1.45fr) !important;gap:10px !important;}
+.aesthetic-scale-frame .aesthetic-bottom .aesthetic-grid{display:contents;}
+.aesthetic-scale-frame .aesthetic-review{grid-column:5;grid-row:1;min-width:0;}
+
+.export-wrap{
+  width:100%;
+  box-sizing:border-box;
+  margin:18px auto 0;
+  padding:18px 0 0;
+  border-top:1px solid var(--line);
+  text-align:center
+}
+.export-button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:auto;
+  min-width:300px;
+  max-width:100%;
+  box-sizing:border-box;
+  border:1px solid var(--accent);
+  background:#171319;
+  color:#f2e7df;
+  border-radius:999px;
+  padding:12px 24px;
+  cursor:pointer;
+  font:700 12px Arial,sans-serif;
+  letter-spacing:.08em;
+  text-transform:uppercase
+}
+.export-output{
+  display:none;
+  margin:12px auto 0;
+  width:100%;
+  max-width:100%;
+  min-height:240px;
+  box-sizing:border-box;
+  resize:vertical;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#0d0b0f;
+  color:#ded3dc;
+  padding:13px;
+  font:11px/1.45 Consolas,Monaco,monospace;
+  text-align:left
+}
+.export-copy{
+  display:none;
+  margin:10px auto 0;
+  border:1px solid var(--line);
+  background:#2b2228;
+  color:#f2e7df;
+  border-radius:9px;
+  padding:9px 18px;
+  cursor:pointer;
+  font-size:11px
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="kicker">The pairing bar · 01</div>
+    <h1>🍸 Cocktail Pairing Bar</h1>
+    <div class="subtitle">Сегодня бармен смешивает двоих. Посмотрим, что получится.</div>
+  </header>
+
+  <section class="section">
+    <h2>👥 Кто сегодня в баре?</h2>
+    <div class="section-note">Загрузите фотографии персонажей и дайте каждому ровно один напиток.</div>
+    <div class="characters">
+      <div class="character-card">
+        <div class="char-photo">
+          <img id="photo1">
+          <div class="drink-badge" id="drinkBadge1"></div>
+          <div class="url-upload" id="urlBox1">
+            <strong>📷 Ссылка на фото персонажа</strong>
+            <input id="photoUrl1" type="url" placeholder="https://...">
+            <button type="button" onclick="loadPhoto(1)">Добавить фото</button>
+          </div>
+        </div>
+        <div class="char-info">
+          <input class="char-name-input" id="name1" placeholder="Имя персонажа №1">
+          <div class="selected-drink"><span class="label">Его / её напиток</span><span class="drink-name" id="sel1">— не выбран —</span></div>
+          <div class="drink-photo-url">
+            <span class="label">Фото напитка</span>
+            <input id="drinkUrl1" type="url" placeholder="Ссылка на картинку напитка">
+            <button type="button" onclick="loadDrinkPhoto(1)">Добавить</button>
+          </div>
+        </div>
+      </div>
+      <div class="x">×</div>
+      <div class="character-card">
+        <div class="char-photo">
+          <img id="photo2">
+          <div class="drink-badge" id="drinkBadge2"></div>
+          <div class="url-upload" id="urlBox2">
+            <strong>📷 Ссылка на фото персонажа</strong>
+            <input id="photoUrl2" type="url" placeholder="https://...">
+            <button type="button" onclick="loadPhoto(2)">Добавить фото</button>
+          </div>
+        </div>
+        <div class="char-info">
+          <input class="char-name-input" id="name2" placeholder="Имя персонажа №2">
+          <div class="selected-drink"><span class="label">Его / её напиток</span><span class="drink-name" id="sel2">— не выбран —</span></div>
+          <div class="drink-photo-url">
+            <span class="label">Фото напитка</span>
+            <input id="drinkUrl2" type="url" placeholder="Ссылка на картинку напитка">
+            <button type="button" onclick="loadDrinkPhoto(2)">Добавить</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>🍹 Выберите напитки</h2>
+    <div class="section-note">Сначала выберите персонажа, которому наливаем. Один общий пул — два независимых выбора.</div>
+    <div class="picker-switch"><button class="picker-person active" id="picker1" onclick="setActiveChar(1)">① Персонаж №1 <span id="pickerDrink1">—</span></button><button class="picker-person" id="picker2" onclick="setActiveChar(2)">② Персонаж №2 <span id="pickerDrink2">—</span></button></div><div class="active-player" id="activePlayer">Сейчас выбираем напиток для персонажа №1</div>
+    <div class="tabs" id="tabs"></div>
+    <div class="drink-viewport">
+      <div class="drink-row" id="drinkRow"></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:center;margin-top:2px">
+      <button class="nav-btn" onclick="scrollDrinks(-1)">← Листать назад</button>
+      <button class="nav-btn" onclick="scrollDrinks(1)">Листать вперёд →</button>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>🧪 Карта смешивания</h2>
+    <div class="section-note">Первый автоматический результат пары.</div>
+    <div class="mix">
+      <div class="mix-drink"><small>Персонаж №1</small><span id="mix1">Выберите напиток</span></div>
+      <div class="plus">+</div>
+      <div class="mix-drink"><small>Персонаж №2</small><span id="mix2">Выберите напиток</span></div>
+    </div>
+    <div class="meta" id="meta"></div>
+
+  </section>
+
+  <section class="section">
+    <h2>🍓 Вкус</h2>
+    <div class="section-note">Каким будет настоящее вкусовое лицо этого пейринга?</div>
+    <div class="scroll-choice" data-choice="taste">
+      <button class="choice"><span>🍓</span><b>Сладкий</b></button>
+      <button class="choice"><span>🍯</span><b>Медовый</b></button>
+      <button class="choice"><span>🍬</span><b>Карамельный</b></button>
+      <button class="choice"><span>🍫</span><b>Шоколадный</b></button>
+      <button class="choice"><span>🌰</span><b>Ореховый</b></button>
+      <button class="choice"><span>🍋</span><b>Кислый</b></button>
+      <button class="choice"><span>🍊</span><b>Цитрусовый</b></button>
+      <button class="choice"><span>🍒</span><b>Ягодный</b></button>
+      <button class="choice"><span>🍑</span><b>Персиковый</b></button>
+      <button class="choice"><span>🥭</span><b>Тропический</b></button>
+      <button class="choice"><span>🍎</span><b>Яблочный</b></button>
+      <button class="choice"><span>🥥</span><b>Кокосовый</b></button>
+      <button class="choice"><span>🌿</span><b>Травянистый</b></button>
+      <button class="choice"><span>🌱</span><b>Свежий</b></button>
+      <button class="choice"><span>☕</span><b>Горьковатый</b></button>
+      <button class="choice"><span>🫒</span><b>Терпкий</b></button>
+      <button class="choice"><span>🧂</span><b>Солоноватый</b></button>
+      <button class="choice"><span>🌶️</span><b>Острый</b></button>
+      <button class="choice"><span>🔥</span><b>Пряный</b></button>
+      <button class="choice"><span>🫧</span><b>Игристый</b></button>
+      <button class="choice"><span>🥛</span><b>Сливочный</b></button>
+      <button class="choice"><span>🍦</span><b>Ванильный</b></button>
+      <button class="choice"><span>🌸</span><b>Цветочный</b></button>
+      <button class="choice"><span>🌊</span><b>Морской</b></button>
+      <button class="choice"><span>🌫️</span><b>Дымный</b></button>
+      <button class="choice"><span>🖤</span><b>Тёмный</b></button>
+      <button class="choice"><span>✨</span><b>Непредсказуемый</b></button>
+      <button class="choice"><span>💀</span><b>«Не спрашивайте»</b></button>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>🌿 Аромат</h2>
+    <div class="section-note">Выберите запах, который остаётся в воздухе после них.</div>
+    <div class="scroll-choice" data-choice="aroma">
+      <button class="choice"><span>🍊</span><b>Апельсиновая цедра</b></button><button class="choice"><span>🍋</span><b>Лимон и лайм</b></button>
+      <button class="choice"><span>🌹</span><b>Розы</b></button><button class="choice"><span>🌸</span><b>Жасмин</b></button>
+      <button class="choice"><span>🌿</span><b>Мята</b></button><button class="choice"><span>🌲</span><b>Сосновый лес</b></button>
+      <button class="choice"><span>🪵</span><b>Дым и дерево</b></button><button class="choice"><span>🍦</span><b>Ваниль</b></button>
+      <button class="choice"><span>🍯</span><b>Карамель</b></button><button class="choice"><span>☕</span><b>Свежий кофе</b></button>
+      <button class="choice"><span>🥥</span><b>Кокос</b></button><button class="choice"><span>🌧️</span><b>Дождь</b></button>
+      <button class="choice"><span>💐</span><b>Дорогой парфюм</b></button><button class="choice"><span>🚬</span><b>Табак</b></button>
+      <button class="choice"><span>🌊</span><b>Морская соль</b></button><button class="choice"><span>💋</span><b>Чужая помада</b></button>
+      <button class="choice"><span>👔</span><b>Чужая рубашка</b></button><button class="choice"><span>🍞</span><b>Свежая выпечка</b></button>
+      <button class="choice"><span>🌙</span><b>Бар после полуночи</b></button><button class="choice"><span>🔥</span><b>Надвигающаяся катастрофа</b></button>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>🍒 Топпинг</h2>
+    <div class="section-note">Последний штрих. Или последнее предупреждение.</div>
+    <div class="scroll-choice" data-choice="topping">
+      <button class="choice"><span>🍒</span><b>Одинокая вишня</b></button><button class="choice"><span>🍒</span><b>Две вишни — бармен всё понял</b></button>
+      <button class="choice"><span>🍓</span><b>Клубника</b></button><button class="choice"><span>🍊</span><b>Апельсиновая долька</b></button>
+      <button class="choice"><span>🍋</span><b>Лимон</b></button><button class="choice"><span>🌿</span><b>Мята</b></button>
+      <button class="choice"><span>🌱</span><b>Розмарин</b></button><button class="choice"><span>🌹</span><b>Съедобные цветы</b></button>
+      <button class="choice"><span>🍫</span><b>Шоколадная стружка</b></button><button class="choice"><span>🥥</span><b>Кокосовая стружка</b></button>
+      <button class="choice"><span>🍯</span><b>Солёная карамель</b></button><button class="choice"><span>☁️</span><b>Взбитые сливки</b></button>
+      <button class="choice"><span>🍬</span><b>Сахарная вата</b></button><button class="choice"><span>🔥</span><b>Перец</b></button>
+      <button class="choice"><span>🧂</span><b>Морская соль</b></button><button class="choice"><span>🍪</span><b>Печенье</b></button>
+      <button class="choice"><span>🍥</span><b>Корица</b></button><button class="choice"><span>🫧</span><b>Съедобные жемчужины</b></button>
+      <button class="choice"><span>✨</span><b>Золотая пыль</b></button><button class="choice"><span>😌</span><b>Ничего. Пусть страдает.</b></button>
+      <button class="choice"><span>🫠</span><b>Бармен случайно уронил это внутрь</b></button>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>🥂 Для кого подаём?</h2>
+    <div class="section-note">Потому что один и тот же коктейль разным людям подают по разным причинам.</div>
+    <div class="scroll-choice" data-choice="served">
+      <button class="choice"><span>💋</span><b>Тому, кому хочется признаться</b></button><button class="choice"><span>❤️</span><b>Тому, кого слишком сильно любишь</b></button>
+      <button class="choice"><span>💔</span><b>Бывшему</b></button><button class="choice"><span>😈</span><b>Будущему бывшему</b></button>
+      <button class="choice"><span>🫂</span><b>Лучшему другу</b></button><button class="choice"><span>👀</span><b>Тому самому человеку</b></button>
+      <button class="choice"><span>🥂</span><b>Им обоим</b></button><button class="choice"><span>🕶️</span><b>Незнакомцу в баре</b></button>
+      <button class="choice"><span>🪞</span><b>Самому себе</b></button><button class="choice"><span>🎉</span><b>Всем на вечеринке</b></button>
+      <button class="choice"><span>💼</span><b>Начальнику, чтобы повысил зарплату</b></button><button class="choice"><span>😤</span><b>Человеку, которого терпеть не можешь</b></button>
+      <button class="choice"><span>🧑‍⚕️</span><b>Тому, кто явно не должен это пить</b></button><button class="choice"><span>🕯️</span><b>В память о старых добрых временах</b></button>
+      <button class="choice"><span>💌</span><b>Тому, кому собирался написать</b></button><button class="choice"><span>🤐</span><b>Тому, с кем давно пора поговорить</b></button>
+      <button class="choice"><span>👰</span><b>На первом свидании</b></button><button class="choice"><span>🤵</span><b>На свадьбе</b></button>
+      <button class="choice"><span>🚪</span><b>Перед тем как уйти навсегда</b></button><button class="choice"><span>💀</span><b>Тому, кто заслужил неприятный сюрприз</b></button>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>🍸 Четыре последних штриха</h2>
+    <div class="section-note">Вставьте ссылки на изображения — они станут визуальной сервировкой итогового пейринга.</div>
+    <div class="four">
+      <div class="visual"><div class="icon">🥃</div><h3>В ЧЕМ ПОДАЕМ?</h3><div class="visual-img" id="glassImg">Вставьте ссылку на картинку</div><input class="image-url" id="glassUrl" type="url" placeholder="https://..."><button class="image-add" onclick="loadVisual('glass')">Добавить</button></div>
+      <div class="visual"><div class="icon">🌙</div><h3>ГДЕ?</h3><div class="visual-img" id="barImg">Вставьте ссылку на картинку</div><input class="image-url" id="barUrl" type="url" placeholder="https://..."><button class="image-add" onclick="loadVisual('bar')">Добавить</button></div>
+      <div class="visual"><div class="icon">🍽️</div><h3>С ЧЕМ?</h3><div class="visual-img" id="foodImg">Вставьте ссылку на картинку</div><input class="image-url" id="foodUrl" type="url" placeholder="https://..."><button class="image-add" onclick="loadVisual('food')">Добавить</button></div>
+      <div class="visual"><div class="icon">🕯️</div><h3>КОГДА?</h3><div class="visual-img" id="timeImg">Вставьте ссылку на картинку</div><input class="image-url" id="timeUrl" type="url" placeholder="https://..."><button class="image-add" onclick="loadVisual('time')">Добавить</button></div>
+    </div>
+  </section>
+
+<section class="section">
+    <h2>🍸 Отзыв бармена</h2>
+    <div class="review">
+      <div class="small" id="reviewPair">БАРМЕН СМОТРИТ НА РЕЗУЛЬТАТ</div>
+      <div class="stars">★★★★★</div>
+      <blockquote id="review">«Бармен пока смотрит на два выбранных напитка и молча оценивает ваши решения.»</blockquote>
+      <div class="small">Авторский коктейль пары. Ответственность за последствия не предусмотрена.</div>
+      <br>
+      <button class="reset" onclick="resetAll()">Начать заново</button>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="generate-wrap">
+      <button class="generate-aesthetic" onclick="generateAesthetic()">✨ СГЕНЕРИРОВАТЬ ЭСТЕТИКУ ПЕЙРИНГА</button>
+      <div class="section-note" style="margin:10px 0 0">Финальный шаг: соберём все выбранные элементы в одну визуальную карту и дадим слово посетителю.</div>
+    </div>
+  </section>
+
+  <section class="section aesthetic-preview" id="aestheticPreview">
+    <h2>✨ Эстетика пейринга</h2>
+    <div class="section-note">Финальная карта — персонажи, напитки, выбранные категории, дополнительная эстетика и отзыв посетителя.</div>
+    <div class="aesthetic-scale-frame" id="aestheticScaleFrame"><div class="aesthetic-sheet" id="aestheticSheet">
+      <div class="aesthetic-head">
+        <div class="aesthetic-characters">
+          <div class="aesthetic-character" id="aestheticCharacter1">
+            <div class="character-fallback">Фото персонажа №1</div>
+            <div class="character-label" id="aestheticCharacterName1">Персонаж №1</div>
+            <div class="drink-mini" id="aestheticDrink1"></div>
+          </div>
+          <div class="aesthetic-character" id="aestheticCharacter2">
+            <div class="character-fallback">Фото персонажа №2</div>
+            <div class="character-label" id="aestheticCharacterName2">Персонаж №2</div>
+            <div class="drink-mini" id="aestheticDrink2"></div>
+          </div>
+        </div>
+
+        <div class="aesthetic-info">
+          <div class="kicker">Cocktail Pairing</div>
+          <h3 id="aestheticTitle">Your Pairing</h3>
+          <div class="names" id="aestheticNames">— × —</div>
+          <div class="aesthetic-tags" id="aestheticTags"></div>
+          <div style="margin-top:18px;color:var(--muted);font-size:13px;line-height:1.5" id="aestheticMixNote">Бармен пока ждёт два напитка.</div>
+        </div>
+      </div>
+
+      <div class="aesthetic-bottom">
+        <div class="aesthetic-grid">
+          <div class="aesthetic-card" id="aestheticGlass"><div class="empty">Вставьте изображение</div><p>В ЧЕМ ПОДАЕМ?</p></div>
+          <div class="aesthetic-card" id="aestheticBar"><div class="empty">Вставьте изображение</div><p>ГДЕ?</p></div>
+          <div class="aesthetic-card" id="aestheticTime"><div class="empty">Вставьте изображение</div><p>КОГДА?</p></div>
+          <div class="aesthetic-card" id="aestheticFood"><div class="empty">Вставьте изображение</div><p>С ЧЕМ?</p></div>
+        </div>
+
+        <div class="aesthetic-review">
+          <div class="small">⭐ ОТЗЫВ ПОСЕТИТЕЛЯ</div>
+          <div class="stars" id="aestheticStars">★★★★★</div>
+          <blockquote id="aestheticReview">Сгенерируйте эстетику, чтобы услышать посетителя.</blockquote>
+          <div class="small" id="aestheticReviewFooter"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+      <div class="export-wrap">
+        <button class="export-button" type="button" onclick="generateAestheticHTML()">⌘ СГЕНЕРИРОВАТЬ HTML ЭСТЕТИКИ</button>
+        <div class="section-note" style="margin:8px 0 0">Получите готовый фрагмент HTML для публикации эстетики на форуме.</div>
+        <textarea id="aestheticHTML" class="export-output" readonly spellcheck="false" placeholder="Здесь появится готовый HTML-код..."></textarea>
+        <button class="export-copy" id="copyAestheticHTML" type="button" onclick="copyAestheticHTML()">Копировать HTML</button>
+        <div class="export-status" id="exportStatus">HTML скопирован в буфер обмена.</div>
+      </div>
+</section>
+
+</div>
+
+<script>
+const drinks = [
+  ["🥃","Whiskey","spirits"],["🥃","Bourbon","spirits"],["🥃","Scotch","spirits"],["🥃","Rye Whiskey","spirits"],
+  ["🍹","Dark Rum","spirits"],["🍹","White Rum","spirits"],["🍹","Spiced Rum","spirits"],["🍸","Gin","spirits"],
+  ["🍸","Vodka","spirits"],["🌵","Tequila","spirits"],["🌵","Mezcal","spirits"],["🥃","Cognac","spirits"],
+  ["🍏","Calvados","spirits"],["🌿","Absinthe","spirits"],["🌿","Sambuca","spirits"],["🥃","Brandy","spirits"],
+  ["🍒","Amaretto","spirits"],["☕","Coffee Liqueur","spirits"],["🥛","Cream Liqueur","spirits"],["🍊","Orange Liqueur","spirits"],
+  ["🍷","Red Wine","wine"],["🍷","White Wine","wine"],["🌹","Rosé","wine"],["🍷","Port","wine"],
+  ["🍸","Vermouth","wine"],["🥂","Champagne","wine"],["🥂","Prosecco","wine"],["🥂","Cava","wine"],
+  ["🍺","Lager","beer"],["🍺","Pilsner","beer"],["🍺","IPA","beer"],["🍺","Stout","beer"],
+  ["🍺","Porter","beer"],["🍺","Wheat Beer","beer"],["🍎","Apple Cider","beer"],["🍐","Pear Cider","beer"],
+  ["☕","Espresso","coffee"],["☕","Americano","coffee"],["☕","Cappuccino","coffee"],["☕","Latte","coffee"],
+  ["☕","Flat White","coffee"],["☕","Mocha","coffee"],["☕","Macchiato","coffee"],["🧊","Cold Brew","coffee"],
+  ["🧊","Nitro Cold Brew","coffee"],["☕","Raf Coffee","coffee"],["🍵","Earl Grey","tea"],["🍵","Black Tea","tea"],
+  ["🍵","Green Tea","tea"],["🌸","Jasmine Tea","tea"],["🍵","Oolong","tea"],["🍵","Pu-erh","tea"],
+  ["🍵","Matcha","tea"],["🫖","Chai Latte","tea"],["🌿","Mint Tea","tea"],["🧊","Peach Iced Tea","tea"],
+  ["🥤","Cola","soft"],["🥤","Cherry Cola","soft"],["🥤","Dr Pepper","soft"],["🥤","Sprite","soft"],
+  ["🥤","Tonic","soft"],["🥤","Ginger Ale","soft"],["🥤","Ginger Beer","soft"],["🥤","Root Beer","soft"],
+  ["⚡","Energy Drink","soft"],["🍋","Lemonade","soft"],["🍓","Strawberry Lemonade","soft"],["🍑","Peach Lemonade","soft"],
+  ["🥭","Mango Juice","juice"],["🍊","Orange Juice","juice"],["🍎","Apple Juice","juice"],["🍍","Pineapple Juice","juice"],
+  ["🍒","Cherry Juice","juice"],["🫐","Cranberry Juice","juice"],["🍇","Grape Juice","juice"],["🥭","Passion Fruit Juice","juice"],
+  ["🥥","Coconut Water","juice"],["🥛","Milk","milky"],["🥛","Cream","milky"],["🥥","Coconut Milk","milky"],
+  ["🥛","Almond Milk","milky"],["🌾","Oat Milk","milky"],["🍫","Chocolate Milk","milky"],["🍫","Hot Chocolate","milky"],
+  ["🫧","Kombucha","wild"],["🧃","Fruit Punch","wild"],["🍎","Spiced Apple Cider","wild"],["🥒","Pickle Brine","wild"],
+  ["🍅","Tomato Juice","wild"],["🫖","Kvass","wild"],["🥛","Milkshake","wild"],["🍌","Banana Shake","wild"]
+];
+
+const categories = [["all","ALL"],["spirits","SPIRITS"],["wine","WINE"],["beer","BEER"],["coffee","COFFEE"],["tea","TEA"],["soft","SOFT"],["juice","JUICE"],["milky","MILKY"],["wild","WILD"]];
+let activeChar = 1, selected=[null,null], activeCategory="all";
+const $=id=>document.getElementById(id);
+
+function renderTabs(){
+  $("tabs").innerHTML=categories.map(([key,label])=>`<button class="tab ${activeCategory===key?'active':''}" onclick="setCategory('${key}')">${label}</button>`).join("");
+}
+function renderDrinks(){
+  const list=activeCategory==="all"?drinks:drinks.filter(d=>d[2]===activeCategory);
+  $("drinkRow").innerHTML=list.map((d,i)=>{
+    const global=drinks.indexOf(d);
+    const isSelected=selected.includes(global);
+    return `<button class="drink ${selected[activeChar-1]===global?'selected':''}" onclick="chooseDrink(${global})">
+      <span class="dt">${d[2]}</span>
+      <span class="emoji">${d[0]}</span>
+      <span class="dn">${d[1]}</span>
+      ${isSelected?'<div class="drink-selected-mark" style="color:#e8b36b;font:9px Arial;margin-top:3px">✓ SELECTED</div>':''}
+    </button>`;
+  }).join("");
+}
+function setCategory(c){activeCategory=c;renderTabs();renderDrinks()}
+function setActiveChar(n){activeChar=n;const name=$(`name${n}`).value.trim()||`персонажа №${n}`;$('activePlayer').textContent=`Сейчас выбираем напиток для ${name}`;document.querySelectorAll('.picker-person').forEach((b,i)=>b.classList.toggle('active',i===n-1));updatePickerSwitch();renderDrinks();}
+function updatePickerSwitch(){[1,2].forEach(n=>{const d=selected[n-1]!=null?drinks[selected[n-1]]:null;$(`pickerDrink${n}`).textContent=d?`${d[0]} ${d[1]}`:'—';});}
+function chooseDrink(i){
+  selected[activeChar-1]=i; updateUI();
+  const name=$(`name${activeChar}`).value.trim()||`персонажа №${activeChar}`;
+  $("activePlayer").textContent=`Сейчас выбираем напиток для ${name}`;
+  updatePickerSwitch(); renderDrinks();
+}
+function updateUI(){
+  if(typeof updatePickerSwitch==='function') updatePickerSwitch();
+  [0,1].forEach((n)=>{
+    const d=selected[n]!=null?drinks[selected[n]]:null;
+    $(`sel${n+1}`).textContent=d?`${d[0]} ${d[1]}`:"— не выбран —";
+    $(`mix${n+1}`).textContent=d?`${d[0]} ${d[1]}`:"Выберите напиток";
+  });
+  const a=selected[0]!=null?drinks[selected[0]]:null,b=selected[1]!=null?drinks[selected[1]]:null;
+  const meta=$("meta");
+  if(!a||!b){meta.innerHTML='<span class="pill">Выберите оба напитка — бармен ждёт.</span>';return}
+  const alcoholic=new Set(["spirits","wine","beer"]);
+  const aAl=alcoholic.has(a[2]),bAl=alcoholic.has(b[2]);
+  let type=aAl&&bAl?"ALCOHOL × ALCOHOL":(!aAl&&!bAl?"ZERO PROOF × ZERO PROOF":"CROSSOVER · ALCOHOL × ZERO PROOF");
+  let mood=(a[2]===b[2])?"Слишком уверены в себе.":"Противоположности притягиваются.";
+  meta.innerHTML=`<span class="pill">${type}</span><span class="pill">${mood}</span><span class="pill">BAR STATUS: ${a&&b?"MIXING":"WAITING"}</span>`;
+  const names=`${a[1]} × ${b[1]}`;
+  $("reviewPair").textContent=names.toUpperCase();
+  const reviews=[
+    "«Очень странный напиток. Сначала кажется спокойным, потом внезапно понимаешь, что он крепче, чем выглядел. Как, собственно, и эти двое.»",
+    "«Заказывали один на двоих. Выпили каждый свой. Считаю, что это был очень честный напиток.»",
+    "«Бармен сказал, что это авторский рецепт. Думаю, он просто забыл, что налил.»",
+    "«Слишком много характера на один бокал. Я бы не ставил рядом с ним вазу.»",
+    "«Я видел много коктейлей. Но этот явно пришёл сюда со своим сюжетом.»",
+    "«На вид — милый. На вкус — решение, о котором придётся вспоминать утром.»",
+    "«Я бы подал это после полуночи. До полуночи люди ещё способны передумать.»",
+    "«Очень убедительная химия. В основном между алкоголем и здравым смыслом.»",
+    "«Если это случайность, то очень талантливая.»",
+    "«Они выбрали друг друга. Я просто налил.»",
+    "«Не спрашивайте рецепт. Я тоже не хочу знать.»",
+    "«Этот коктейль явно знает что-то, чего не знает столик.»",
+    "«Пахнет дорого. Выглядит опасно. Значит, всё идёт по плану.»",
+    "«Смешал. Попробовал. Посмотрел на них. Решил ничего не уточнять.»",
+    "«Я бы назвал его гармоничным, если бы гармония не выглядела настолько подозрительно.»",
+    "«В этом бокале слишком много недосказанного.»",
+    "«Обычно я предупреждаю гостей. Сегодня решил посмотреть, что будет.»",
+    "«Идеальное сочетание для разговора, который давно пора было начать.»",
+    "«Вкус убедительный. Послевкусие — юридическое.»",
+    "«Пять минут назад это были два напитка. Теперь это семейная история.»",
+    "«Сложно сказать, что здесь смешалось первым: напитки или отношения.»",
+    "«Я подавал и страннее. Но не настолько красиво.»",
+    "«Пожалуй, это тот случай, когда гарнир лучше не трогать.»",
+    "«Бармен одобряет. Бармен также отказывается нести ответственность.»"
+  ];
+  const bartenderIndex=(
+    selected[0]*11+
+    selected[1]*7+
+    getActiveChoiceIndex("taste")*3+
+    getActiveChoiceIndex("aroma")*5+
+    getActiveChoiceIndex("topping")
+  )%reviews.length;
+  $("review").textContent="Бармен: "+reviews[bartenderIndex].replace(/[«»]/g,"");
+  
+}
+function scrollDrinks(dir){$("drinkRow").scrollBy({left:dir*520,behavior:"smooth"})}
+document.querySelectorAll("[data-choice]").forEach(group=>{
+  group.querySelectorAll(".choice").forEach(btn=>btn.addEventListener("click",()=>{
+    group.querySelectorAll(".choice").forEach(x=>x.classList.remove("active"));btn.classList.add("active");
+  }));
+});
+function loadPhoto(n){
+  const url=$(`photoUrl${n}`).value.trim();
+  if(!url)return;
+  const img=$(`photo${n}`);
+  img.onload=()=>{$(`urlBox${n}`).style.display="none";};
+  img.onerror=()=>alert("Не удалось загрузить картинку. Нужна прямая ссылка на изображение.");
+  img.src=url; img.style.display="block";
+}
+function loadVisual(type){
+  const url=$(`${type}Url`).value.trim();
+  if(!url)return;
+  $(`${type}Img`).innerHTML=`<img src="${url}" alt="">`;
+}
+function loadDrinkPhoto(n){
+  const url=$(`drinkUrl${n}`).value.trim();
+  if(!url)return;
+  const badge=$(`photo${n}`).parentElement.querySelector(".drink-badge");
+  if(badge){
+    badge.innerHTML=`<img src="${url}" alt="">`;
+    badge.style.display="block";
+  }
+  
+}
+function getActiveChoiceIndex(type){
+  const group=document.querySelector(`[data-choice="${type}"]`);
+  if(!group)return 0;
+  const buttons=[...group.querySelectorAll(".choice")];
+  const active=group.querySelector(".choice.active");
+  const idx=buttons.indexOf(active);
+  return idx<0?0:idx;
+}
+function getActiveChoiceText(type){const g=document.querySelector(`[data-choice="${type}"]`);const a=g&&g.querySelector('.choice.active');return a?a.querySelector('b').textContent:'Не выбран';}
+function copyVisualToCard(type,id,label){const u=$(`${type}Url`).value.trim(),t=$(id);t.innerHTML=u?`<img src="${u}" alt=""><p>${label}</p>`:`<div class="empty">Добавьте ссылку</div><p>${label}</p>`;}
+
+function scaleFinalAesthetic(){
+  const frame=$("aestheticScaleFrame");
+  const sheet=$("aestheticSheet");
+  if(!frame || !sheet)return;
+
+  // Keep the composition at a fixed design width; only scale the whole canvas.
+  sheet.style.transform="scale(1)";
+  const baseWidth=1000;
+  const available=Math.max(1,frame.clientWidth);
+  const scale=Math.min(1,available/baseWidth);
+
+  sheet.style.transform=`scale(${scale})`;
+  // getBoundingClientRect() includes the transformed height, unlike scrollHeight.
+  requestAnimationFrame(()=>{
+    const rect=sheet.getBoundingClientRect();
+    frame.style.height=(rect.height+10)+"px";
+  });
+}
+
+let aestheticScaleObserver=null;
+function initAestheticScaler(){
+  const frame=$("aestheticScaleFrame");
+  const sheet=$("aestheticSheet");
+  if(!frame || !sheet)return;
+
+  if(aestheticScaleObserver)aestheticScaleObserver.disconnect();
+  aestheticScaleObserver=new ResizeObserver(()=>scaleFinalAesthetic());
+  aestheticScaleObserver.observe(frame);
+  aestheticScaleObserver.observe(sheet);
+
+  requestAnimationFrame(scaleFinalAesthetic);
+  setTimeout(scaleFinalAesthetic,50);
+  setTimeout(scaleFinalAesthetic,250);
+  setTimeout(scaleFinalAesthetic,700);
+}
+window.addEventListener("resize",scaleFinalAesthetic);
+
+function generateAesthetic(){
+  if(selected[0]==null || selected[1]==null){
+    alert("Сначала выберите напиток для обоих персонажей.");
+    return;
+  }
+
+  const a=drinks[selected[0]];
+  const b=drinks[selected[1]];
+  const n1=$("name1").value.trim() || "Персонаж №1";
+  const n2=$("name2").value.trim() || "Персонаж №2";
+
+  $("aestheticTitle").textContent=`${a[1]} × ${b[1]}`;
+  $("aestheticNames").textContent=`${n1} × ${n2}`;
+
+  $("aestheticTags").innerHTML=[
+    `🍓 ${getActiveChoiceText("taste")}`,
+    `🌿 ${getActiveChoiceText("aroma")}`,
+    `🥂 ${getActiveChoiceText("served")}`,
+    `🍒 ${getActiveChoiceText("topping")}`
+  ].map(x=>`<span class="aesthetic-tag">${x}</span>`).join("");
+
+  $("aestheticMixNote").textContent=`${a[0]} ${a[1]} + ${b[0]} ${b[1]}`;
+
+  // Два квадратных портрета + соответствующие фотографии напитков.
+  [1,2].forEach(n=>{
+    const box=$(`aestheticCharacter${n}`);
+    const fallback=box.querySelector(".character-fallback");
+    const oldPhoto=box.querySelector(".character-photo");
+    const drinkBox=$(`aestheticDrink${n}`);
+    const photo=$(`photo${n}`).src;
+    const drinkUrl=$(`drinkUrl${n}`).value.trim();
+    const name=$(`name${n}`).value.trim() || `Персонаж №${n}`;
+
+    $(`aestheticCharacterName${n}`).textContent=name;
+
+    if(oldPhoto) oldPhoto.remove();
+
+    if(photo){
+      fallback.style.display="none";
+      const img=document.createElement("img");
+      img.className="character-photo";
+      img.src=photo;
+      img.alt=name;
+      box.insertBefore(img,box.firstChild);
+    }else{
+      fallback.style.display="flex";
+    }
+
+    drinkBox.innerHTML="";
+    if(drinkUrl){
+      const img=document.createElement("img");
+      img.src=drinkUrl;
+      img.alt=`Напиток ${n}`;
+      drinkBox.appendChild(img);
+      drinkBox.style.display="block";
+    }else{
+      drinkBox.style.display="none";
+    }
+  });
+
+  // Четыре дополнительных изображения.
+  copyVisualToCard("glass","aestheticGlass","В ЧЕМ ПОДАЕМ?");
+  copyVisualToCard("bar","aestheticBar","ГДЕ?");
+  copyVisualToCard("time","aestheticTime","КОГДА?");
+  copyVisualToCard("food","aestheticFood","С ЧЕМ?");
+
+  // Финальный отзыв посетителя.
+const reviews=[
+    ["★★★★★","«Не знаю, что туда налили, но после второго бокала хочется написать ему. После третьего — его жене. Бармен отказался объяснять ситуацию.»","Would order again. Would not recommend to emotionally unstable people."],
+    ["★★★★★","«Очень красивый напиток. Очень плохая идея. Закажу ещё.»","The table asked for the recipe. The bartender asked them not to."],
+    ["★★★★☆","«Сначала сладко, потом горько. В общем, как отношения с этим человеком.»","Surprisingly accurate pairing."],
+    ["★★★★★","«Пили вдвоём. Теперь официально встречаемся.»","Five stars for chemistry. One star for consequences."],
+    ["★★☆☆☆","«Пили вдвоём. Теперь официально не разговариваем.»","The cocktail did exactly what it was supposed to do."],
+    ["★★★★★","«На вкус — отвратительно. Атмосфера — великолепная. Поставил пять звёзд.»","Would recommend for dramatic purposes only."],
+    ["★★★★☆","«Я пришёл за коктейлем. Ушёл с осознанием, что мне надо менять жизнь.»","Excellent service. Existential crisis included."],
+    ["★★★★★","«Слишком много характера на один бокал.»","The bartender called it a feature, not a bug."],
+    ["★★★★★","«Заказали напиток ради эстетики. Остались ради сплетен.»","A very successful evening."],
+    ["★★★★☆","«Попросил что-нибудь лёгкое. Мне принесли этот коктейль и правду о моих отношениях.»","Unexpectedly therapeutic."],
+    ["★★★★★","«Это было свидание или дегустация? После третьего глотка разницы уже не было.»","Romance with a garnish."],
+    ["★★★☆☆","«Сначала я поставил три звезды. Потом попробовал ещё раз и понял, что это не напиток, а характер.»","Acquired taste. Strong personality."],
+    ["★★★★★","«Идеально сочетается с человеком напротив. Особенно если он тоже не знает, что происходит.»","Pairs beautifully with poor decisions."],
+    ["★★★★☆","«Подача великолепная. Вкус подозрительно похож на начало нового этапа жизни.»","Proceed with curiosity."],
+    ["★★★★★","«Я пришёл выпить один коктейль. Теперь у меня новая теория о любви.»","The staff cannot explain the connection."],
+    ["★★★★☆","«Очень атмосферно. Я даже забыл, что пришёл сюда жаловаться.»","Five minutes of peace achieved."],
+    ["★★★★★","«Один бокал на двоих — плохая идея. Поэтому, конечно, мы заказали именно его.»","Shared responsibility."],
+    ["★★★★★","«Вкус: да. Решения: нет. Компания: великолепная.»","A balanced review."],
+    ["★★★☆☆","«Слишком красиво, чтобы быть безопасным.»","Proceed with caution."],
+    ["★★★★★","«Бармен посмотрел на нас, посмотрел на коктейль и сказал: “Ну, удачи”. Я понял, что вечер удался.»","Would absolutely repeat."],
+    ["★★★★☆","«После этого коктейля мы наконец-то сказали друг другу то, что собирались три месяца.»","Therapeutic side effects."],
+    ["★★★★★","«Очень странно. Очень вкусно. Очень хочется узнать, кто придумал эту пару.»","Five stars for intrigue."],
+    ["★★★★☆","«Я не уверен, что это сочетание должно работать. Но оно работает, и это самое подозрительное.»","Questionable science, excellent result."],
+    ["★★★★★","«Лучший способ понять эти отношения — заказать их в бокале.»","An unusually accurate pairing."]
+  ];
+  const visitorIndex=(
+    selected[0]*13+
+    selected[1]*17+
+    getActiveChoiceIndex("taste")*5+
+    getActiveChoiceIndex("aroma")*7+
+    getActiveChoiceIndex("served")*3+
+    getActiveChoiceIndex("topping")*11
+  )%reviews.length;
+  const r=reviews[visitorIndex];
+  $("aestheticStars").textContent=r[0];
+  $("aestheticReview").textContent=r[1];
+  $("aestheticReviewFooter").textContent=r[2];
+
+  $("aestheticPreview").style.display="block";
+  initAestheticScaler();
+  initAestheticScaler();
+  $("aestheticPreview").scrollIntoView({behavior:"smooth",block:"center"});
+}
+function escExport(value){return String(value||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");}
+function exportImg(url,fallback){return url?`<img src="${escExport(url)}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">`:`<div style="height:100%;display:flex;align-items:center;justify-content:center;color:#8e838d;font:12px Arial,sans-serif;padding:15px;text-align:center;">${escExport(fallback)}</div>`;}
+function generateAestheticHTML(){
+ if(selected[0]==null||selected[1]==null){alert("Сначала выберите напиток для обоих персонажей.");return;}
+ const a=drinks[selected[0]],b=drinks[selected[1]],n1=$("name1").value.trim()||"Персонаж №1",n2=$("name2").value.trim()||"Персонаж №2",p1=$("photo1").src,p2=$("photo2").src,d1=$("drinkUrl1").value.trim(),d2=$("drinkUrl2").value.trim();
+ const tags=[getActiveChoiceText("taste"),getActiveChoiceText("aroma"),getActiveChoiceText("served"),getActiveChoiceText("topping")];
+ const html=`<!-- COCKTAIL PAIRING -->
+<div style="width:100%;margin:20px auto;box-sizing:border-box;overflow:hidden;">
+  <div style="width:100%;box-sizing:border-box;padding:clamp(12px,2vw,20px);background:#151116;color:#eee6eb;border:1px solid #4b3a48;border-radius:24px;font-family:Arial,sans-serif;">
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(10px,1.6vw,16px);align-items:start;">
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(7px,1vw,10px);">
+        ${[1,2].map(n=>{const p=n===1?p1:p2,d=n===1?d1:d2,name=n===1?n1:n2;return `<div style="position:relative;aspect-ratio:1/1;border-radius:14px;overflow:hidden;background:#201a22;border:1px solid #41333f;">${exportImg(p,name)}<div style="position:absolute;left:8px;top:8px;padding:5px 8px;border-radius:7px;background:#120f14dd;color:#f4ebe4;font-size:11px;">${escExport(name)}</div>${d?`<div style="position:absolute;right:8px;bottom:8px;width:52px;height:52px;border-radius:9px;overflow:hidden;border:2px solid #f4e7df;background:#171319;box-shadow:0 7px 18px #000b;">${exportImg(d,"")}</div>`:""}</div>`}).join("")}
+      </div>
+
+      <div style="border:1px solid #41333f;border-radius:14px;padding:clamp(14px,2vw,20px);background:#100d12;min-width:0;box-sizing:border-box;">
+        <div style="font-size:10px;letter-spacing:.18em;color:#9f929e;text-transform:uppercase;">COCKTAIL PAIRING</div>
+        <h2 style="font-size:clamp(20px,3vw,28px);font-weight:400;line-height:1.1;margin:8px 0;">${escExport(a[1])} × ${escExport(b[1])}</h2>
+        <div style="color:#d9a66e;font-size:15px;margin-bottom:15px;">${escExport(n1)} × ${escExport(n2)}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:7px;">${tags.map((x,i)=>`<span style="padding:7px 9px;border:1px solid #41333f;border-radius:99px;font-size:11px;white-space:nowrap;">${["🍓","🌿","🥂","🍒"][i]} ${escExport(x)}</span>`).join("")}</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) minmax(0,1.45fr);gap:clamp(7px,1vw,10px);margin-top:clamp(10px,1.5vw,14px);align-items:start;">
+      ${[["glassUrl","В ЧЕМ ПОДАЕМ?"],["barUrl","ГДЕ?"],["timeUrl","КОГДА?"],["foodUrl","С ЧЕМ?"]].map(([id,label])=>`<div style="min-width:0;display:flex;flex-direction:column;align-items:stretch;"><div style="width:100%;aspect-ratio:180/260;overflow:hidden;background:#201a22;border:1px solid #41333f;border-radius:12px;box-sizing:border-box;">${exportImg($(id).value.trim(),label)}</div><div style="font-weight:700;font-size:clamp(9px,1.2vw,12px);line-height:1.15;letter-spacing:.1em;text-align:center;padding:10px 3px 12px;white-space:nowrap;box-sizing:border-box;">${label}</div></div>`).join("")}
+
+      <div style="min-width:0;min-height:260px;padding:clamp(12px,1.8vw,20px);border:1px solid #493849;border-radius:15px;background:#201923;text-align:center;display:flex;flex-direction:column;justify-content:center;box-sizing:border-box;">
+        <div style="font-size:10px;letter-spacing:.16em;color:#9f929e;">⭐ ОТЗЫВ ПОСЕТИТЕЛЯ</div>
+        <div style="font-size:17px;margin-top:6px;">${escExport($("aestheticStars").textContent)}</div>
+        <blockquote style="font-size:clamp(12px,1.55vw,17px);line-height:1.35;margin:8px auto;max-width:760px;">${escExport($("aestheticReview").textContent)}</blockquote>
+        <div style="font-size:9px;letter-spacing:.08em;color:#9f929e;">${escExport($("aestheticReviewFooter").textContent)}</div>
+      </div>
+    </div>
+  </div>
+</div>`;
+ $("aestheticHTML").value=html;$("aestheticHTML").style.display="block";$("copyAestheticHTML").style.display="inline-block";$("exportStatus").style.display="none";$("aestheticHTML").select();
+}
+async function copyAestheticHTML(){const area=$("aestheticHTML");if(!area.value)return;try{await navigator.clipboard.writeText(area.value)}catch(e){area.focus();area.select();document.execCommand("copy")}$("exportStatus").style.display="block";}
+
+function resetAll(){
+  selected=[null,null];activeChar=1;activeCategory="all";
+  ["name1","name2","photoUrl1","photoUrl2","drinkUrl1","drinkUrl2","glassUrl","barUrl","foodUrl","timeUrl"].forEach(id=>$(id).value=""); ["glassImg","barImg","foodImg","timeImg"].forEach(id=>$(id).innerHTML="Вставьте ссылку на картинку");
+  [1,2].forEach(n=>{ $(`photo${n}`).style.display="none";$(`photo${n}`).src="";$(`urlBox${n}`).style.display="block";$(`drinkBadge${n}`).style.display="none";$(`drinkBadge${n}`).innerHTML="";});
+  
+  
+  
+  document.querySelectorAll(".choice").forEach(x=>x.classList.remove("active")); $("aestheticPreview").style.display="none";  
+  $("activePlayer").textContent="Сейчас выбираем напиток для персонажа №1";
+  updateUI();renderTabs();renderDrinks();
+}
+renderTabs();renderDrinks();updateUI();updatePickerSwitch();
+</script>
+</body>
+</html>
